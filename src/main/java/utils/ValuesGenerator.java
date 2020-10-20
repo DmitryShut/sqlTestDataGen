@@ -54,10 +54,18 @@ public class ValuesGenerator {
         return "TIME WITH TIME ZONE '" + generateDate() + " " + generateTime() + generateTimeZone() + "'";
     }
 
+    private static String generateTimeStamp() {
+        return "'" + generateDate() + " " + generateTime() + "'";
+    }
+
     public static String generateValue(ColumnMetaData columnMetaData) {
         if (columnMetaData.getColumnType().equals("int8"))
             return generateIterationId();
+        if (columnMetaData.getColumnType().equals("int"))
+            return generateIterationId();
         if (columnMetaData.getColumnType().equals("text"))
+            return wrapInQuotes(generateLorem());
+        if (columnMetaData.getColumnType().equals("varchar"))
             return wrapInQuotes(generateLorem());
         if (columnMetaData.getColumnType().equals("bool"))
             return generateBool();
@@ -69,6 +77,8 @@ public class ValuesGenerator {
             return generateTimeWithTimeZone();
         if (columnMetaData.getColumnType().equals("timestamptz"))
             return generateTimeStampWithTimeZone();
+        if (columnMetaData.getColumnType().equals("datetime"))
+            return generateTimeStamp();
         if (columnMetaData.getColumnType().equals("date"))
             return wrapInQuotes(generateDate());
         if(columnMetaData.getColumnType().equals("serial"))

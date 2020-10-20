@@ -12,9 +12,9 @@ public class DataSource {
     private static final HikariDataSource ds;
 
     static {
-        config.setJdbcUrl( "jdbc:postgresql://localhost/bookup" );
-        config.setUsername( "bookupAdmin" );
-        config.setPassword( "bookupAdmin" );
+        config.setJdbcUrl( "jdbc:sqlserver://DESKTOP-8NH6KA9;database=Air" );
+        config.setUsername( "shut" );
+        config.setPassword( "shut" );
         ds = new HikariDataSource( config );
     }
 

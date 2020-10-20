@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Comparator;
 
 public class MetaDataCollector {
@@ -22,7 +23,7 @@ public class MetaDataCollector {
             ResultSet rsTables = meta.getTables(catalog, schemaPattern, tableNamePattern, types);
             while (rsTables.next()) {
                 String tableName = rsTables.getString(3);
-                if (tableName.contains("databasechangelog"))
+                if (Arrays.asList("databasechangelog", "trace_xe_action_map", "trace_xe_event_map", "sysdiagrams").contains(tableName))
                     continue;
                 TableMetaData tableMetaData = new TableMetaData(tableName);
                 ResultSet rsColumns = meta.getColumns(catalog, schemaPattern, tableName, null);
@@ -33,7 +34,9 @@ public class MetaDataCollector {
                     String columnName = rsColumns.getString("COLUMN_NAME");
                     String typeName = rsColumns.getString("TYPE_NAME");
                     String isAutoincrement = rsColumns.getString("IS_AUTOINCREMENT");
-                    tableMetaData.getNameToColumnMeta().put(columnName, new ColumnMetaData(columnName, typeName, isAutoincrement.equals("YES")));
+                    if(!isAutoincrement.equals("YES")){
+                        tableMetaData.getNameToColumnMeta().put(columnName, new ColumnMetaData(columnName, typeName, isAutoincrement.equals("YES")));
+                    }
                 }
                 while (rsPK.next()) {
                     ColumnMetaData columnMetaData = tableMetaData.getNameToColumnMeta().get(rsPK.getString("COLUMN_NAME"));
