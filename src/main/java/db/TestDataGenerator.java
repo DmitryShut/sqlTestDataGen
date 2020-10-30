@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class TestDataGenerator {
 
-    public static final int REITERATION = 20;
+    public static final int REITERATION = 200;
 
     public List<String> generate(DatabaseMetaDataDto databaseMetaDataDto) {
         List<String> strings = new ArrayList<>();
@@ -19,7 +19,7 @@ public class TestDataGenerator {
                 String insertString = generateInsert(tableMetaData.getTableName(),
                         tableMetaData.getNameToColumnMeta().keySet(),
                         tableMetaData.getNameToColumnMeta().values().stream()
-                                .map(ValuesGenerator::generateValue)
+                                .map(columnMetaData -> ValuesGenerator.generateValue(columnMetaData, tableMetaData))
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toList())
                 );

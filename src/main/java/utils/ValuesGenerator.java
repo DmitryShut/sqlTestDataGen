@@ -2,20 +2,36 @@ package utils;
 
 import db.TestDataGenerator;
 import entity.ColumnMetaData;
+import entity.TableMetaData;
 import lombok.Data;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static db.TestDataGenerator.wrapInQuotes;
-import static java.sql.Types.*;
 
 @Data
 public class ValuesGenerator {
 
     private static String lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 
+    private static Map<String, Integer> cache = new HashMap<>();
+
     public static String generateLorem() {
         return lorem.substring(0, ThreadLocalRandom.current().nextInt(1, 40));
+    }
+
+    public static String generateString(String fieldName) {
+        if (cache.get(fieldName) == null) {
+            cache.put(fieldName, 0);
+            return fieldName + "_" + 0;
+        } else {
+            Integer integer = cache.get(fieldName);
+            Integer integer1 = integer + 1;
+            cache.put(fieldName, integer + 1);
+            return fieldName + "_" + integer1;
+        }
     }
 
     public static String generateIterationId() {
@@ -31,11 +47,11 @@ public class ValuesGenerator {
     }
 
     private static String generateTime() {
-        return generateInteger(1, 24) + ":" + generateInteger(1, 60) + ":" + generateInteger(1, 60);
+        return generateInteger(1, 23) + ":" + generateInteger(1, 59) + ":" + generateInteger(1, 59);
     }
 
     private static String generateDate() {
-        return 2020 + "-" + generateInteger(0, 12) + "-" + generateInteger(0, 28);
+        return 2020 + "-" + generateInteger(1, 12) + "-" + generateInteger(1, 28);
     }
 
     private static String generateTimeZone() {
@@ -55,10 +71,20 @@ public class ValuesGenerator {
     }
 
     private static String generateTimeStamp() {
-        return "'" + generateDate() + " " + generateTime() + "'";
+        return "CONVERT(DATETIME, '" + generateDate() + " " + generateTime() + "')";
     }
 
-    public static String generateValue(ColumnMetaData columnMetaData) {
+    private static String generatePhone() {
+        StringBuilder s = new StringBuilder("+375");
+        for (int i = 0; i < 9; i++) {
+            s.append(generateInteger(0, 9));
+        }
+        return s.toString();
+    }
+
+    public static String generateValue(ColumnMetaData columnMetaData, TableMetaData tableMetaData) {
+        if (columnMetaData.getColumnName().equals("phone"))
+            return wrapInQuotes(generatePhone());
         if (columnMetaData.getColumnType().equals("int8"))
             return generateIterationId();
         if (columnMetaData.getColumnType().equals("int"))
@@ -66,7 +92,7 @@ public class ValuesGenerator {
         if (columnMetaData.getColumnType().equals("text"))
             return wrapInQuotes(generateLorem());
         if (columnMetaData.getColumnType().equals("varchar"))
-            return wrapInQuotes(generateLorem());
+            return wrapInQuotes(generateString(tableMetaData.getTableName()));
         if (columnMetaData.getColumnType().equals("bool"))
             return generateBool();
         if (columnMetaData.getColumnType().equals("float8"))
@@ -81,7 +107,7 @@ public class ValuesGenerator {
             return generateTimeStamp();
         if (columnMetaData.getColumnType().equals("date"))
             return wrapInQuotes(generateDate());
-        if(columnMetaData.getColumnType().equals("serial"))
+        if (columnMetaData.getColumnType().equals("serial"))
             return null;
         return "string";
     }
